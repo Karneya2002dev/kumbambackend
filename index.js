@@ -12,18 +12,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// DB Connection
+
+
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-  connectTimeout: 10000
+  port: process.env.DB_PORT
 });
-db.connect(err => {
-  if (err) throw err;
-  console.log('✅ MySQL connected');
+
+db.connect((err) => {
+  if (err) {
+    console.error('DB connection failed:', err);
+  } else {
+    console.log('Connected to Railway DB!');
+  }
 });
 
 app.use('/uploads', express.static('uploads'));
