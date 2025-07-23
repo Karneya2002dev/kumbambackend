@@ -14,11 +14,11 @@ app.use(express.json());
 
 // DB Connection
 const db = mysql.createConnection({
-  host: '127.0.0.1',
-  user: 'root',
-  password: '',
-  database: 'kumbam',
-  port:'3306'
+ host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  port: 3306  
 });
 
 db.connect(err => {
@@ -106,11 +106,12 @@ app.post('/api/login', async (req, res) => {
 
           console.log('✅ OTP sent to email:', info.response);
 
-          // ✅ This is what your frontend expects:
+          // ✅ ✅ UPDATED RESPONSE
           res.json({
             success: true,
-            token: otp,         // Temporary token (OTP)
-            phone: user.phone,  // Required by frontend
+            token: otp,
+            phone: user.phone,
+            username: user.full_name, // ✅ Send username to frontend
             message: 'OTP sent successfully'
           });
         });
