@@ -293,19 +293,23 @@ app.post('/api/resend-email-otp', async (req, res) => {
   }
 
   try {
-    // Check if user exists
-    const [user] = await db.promise().query('SELECT * FROM users WHERE email = ?', [email]);
-    if (user.length === 0) {
+    // Safe Destructuring
+    const [rows] = await db.promise().query('SELECT * FROM users WHERE email = ?', [email]);
+
+    if (!Array.isArray(rows) || rows.length === 0) {
       return res.status(404).json({ message: 'Email not found' });
     }
 
-    // Generate new OTP
+    // ✅ Generate new OTP
     const otp = Math.floor(100000 + Math.random() * 900000);
 
-    // Save OTP to DB
-    await db.promise().query('UPDATE otp_verification SET otp = ? WHERE email = ?', [otp, email]);
+    // ✅ Save OTP to DB
+    await db.promise().query(
+      'INSERT INTO otp_verification (email, otp, expires_at) VALUES (?, ?, ?)',
+      [email, otp, new Date(Date.now() + 5 * 60000)]
+    );
 
-    // Send OTP via email
+    // ✅ Send Email
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
@@ -320,7 +324,6 @@ app.post('/api/resend-email-otp', async (req, res) => {
       }
       return res.status(200).json({ message: 'OTP resent successfully' });
     });
-
   } catch (err) {
     console.error('Resend OTP Error:', err);
     res.status(500).json({ message: 'Server error' });
