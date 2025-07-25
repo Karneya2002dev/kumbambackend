@@ -290,16 +290,23 @@ app.post('/api/bookings', (req, res) => {
 });
 
 
-app.get('/api/bookings/:id', (req, res) => {
+// GET /booking/:id
+app.get('/booking/:id', (req, res) => {
   const bookingId = req.params.id;
-  const sql = 'SELECT * FROM bookings WHERE id = ?';
+  const sql = 'SELECT name, phone, mahal_name, price FROM bookings WHERE id = ?';
 
   db.query(sql, [bookingId], (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (result.length === 0) return res.status(404).json({ message: 'Booking not found' });
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    if (result.length === 0) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
     res.json(result[0]);
   });
 });
+
 
 
 
