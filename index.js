@@ -327,18 +327,28 @@ app.get('/api/banquet_halls/:id', (req, res) => {
 
 
 // GET /api/bookings/dates/:mahalName
-app.get('/api/bookings/dates/:mahalName', (req, res) => {
-  const { mahalName } = req.params;
-  const sql = 'SELECT dates FROM bookings WHERE mahal_name = ?';
+app.get('/api/calendar/:mahalId/:month/:year', async (req, res) => {
+  const { mahalId, month, year } = req.params;
 
-  db.query(sql, [mahalName], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+  try {
+    // Example dummy data
+    const booked = await getBookedDates(mahalId, month, year); // array of YYYY-MM-DD
+    const valarpirai = await getValarpiraiDates(month, year);
+    const theipirai = await getTheipiraiDates(month, year);
 
-    // Flatten and parse booked dates
-    const bookedDates = results.flatMap(row => JSON.parse(row.dates));
-    res.json(bookedDates);
-  });
+    res.json({
+      month: Number(month),
+      year: Number(year),
+      bookedDates: booked,
+      valarpiraiDates: valarpirai,
+      theipiraiDates: theipirai
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server Error");
+  }
 });
+
 
 
 
