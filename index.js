@@ -291,7 +291,7 @@ app.post('/api/bookings', (req, res) => {
 
 
 // GET /booking/:id
-app.get('/booking/:id', (req, res) => {
+app.get('/api/booking/:id', (req, res) => {
   const bookingId = req.params.id;
   const sql = 'SELECT name, phone, mahal_name, price FROM bookings WHERE id = ?';
 
