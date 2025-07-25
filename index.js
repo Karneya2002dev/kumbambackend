@@ -34,8 +34,8 @@ db.getConnection((err, connection) => {
   }
 });
 
-const availabilityRoute = require('./routes/availablity');
-app.use('/api/availability', availabilityRoute);
+// const availabilityRoute = require('./routes/availablity');
+// app.use('/api/availability', availabilityRoute);
 
 
 // ✅ Nodemailer Setup
@@ -249,19 +249,19 @@ app.get('/api/categories', (req, res) => {
 });
 
 // ✅ Availability with Mahal Name & Price
-app.get('/api/availability/:mahalId/:month/:year', (req, res) => {
-  const { mahalId, month, year } = req.params;
-  const sql = `
-    SELECT bh.name AS mahal_name, bh.price AS mahal_price, b.booking_date, b.status
-    FROM bookings b
-    JOIN banquet_halls bh ON b.mahal_id = bh.id
-    WHERE MONTH(b.booking_date) = ? AND YEAR(b.booking_date) = ? AND b.mahal_id = ?
-  `;
-  db.query(sql, [month, year, mahalId], (err, result) => {
-    if (err) return res.status(500).json({ error: err });
-    res.json(result);
-  });
-});
+// app.get('/api/availability/:mahalId/:month/:year', (req, res) => {
+//   const { mahalId, month, year } = req.params;
+//   const sql = `
+//     SELECT bh.name AS mahal_name, bh.price AS mahal_price, b.booking_date, b.status
+//     FROM bookings b
+//     JOIN banquet_halls bh ON b.mahal_id = bh.id
+//     WHERE MONTH(b.booking_date) = ? AND YEAR(b.booking_date) = ? AND b.mahal_id = ?
+//   `;
+//   db.query(sql, [month, year, mahalId], (err, result) => {
+//     if (err) return res.status(500).json({ error: err });
+//     res.json(result);
+//   });
+// });
 
 
 app.post('/api/bookings', (req, res) => {
