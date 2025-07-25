@@ -290,6 +290,17 @@ app.post('/api/bookings', (req, res) => {
 });
 
 
+app.get('/bookings/:id', (req, res) => {
+  const bookingId = req.params.id;
+  const sql = 'SELECT * FROM bookings WHERE id = ?';
+  db.query(sql, [bookingId], (err, results) => {
+    if (err) return res.status(500).json({ error: 'Database error' });
+    if (results.length === 0) return res.status(404).json({ error: 'Not found' });
+    res.json(results[0]);
+  });
+});
+
+
 // ✅ Start Server
 app.listen(5000, '0.0.0.0', () => {
   console.log('✅ Server running on port 5000');
