@@ -327,7 +327,7 @@ app.get('/api/banquet_halls/:id', (req, res) => {
 
 
 // GET /api/bookings/dates/:mahalName
-app.get('/api/calendar/:mahalId/:month/:year', async (req, res) => {
+app.get('/api/availability/:mahalId/:month/:year', async (req, res) => {
   const { mahalId, month, year } = req.params;
 
   try {
