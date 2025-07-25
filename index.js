@@ -265,20 +265,27 @@ app.get('/api/availability/:mahalId/:month/:year', (req, res) => {
 
 
 app.post('/api/bookings', (req, res) => {
-  const { name, phone, event_type, address, mahal_name, location, price, dates } = req.body;
+  const {
+    name, phone, event_type,
+    address, mahal_name, location,
+    price, dates
+  } = req.body;
 
-  const query = `
-    INSERT INTO bookings (name, phone, event_type, address, mahal_name, location, price, dates)
+  const sql = `
+    INSERT INTO bookings
+    (name, phone, event_type, address, mahal_name, location, price, dates)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
-  const values = [name, phone, event_type, address, mahal_name, location, price, dates];
 
-  db.query(query, values, (err, result) => {
+  db.query(sql, [
+    name, phone, event_type, address,
+    mahal_name, location, price, dates
+  ], (err, result) => {
     if (err) {
-      console.error('Booking Error:', err);
-      return res.status(500).json({ message: 'Server Error' });
+      console.error("Booking Error:", err);
+      return res.status(500).json({ message: 'Booking failed', error: err });
     }
-    res.status(200).json({ message: 'Booking saved successfully' });
+    res.status(200).json({ message: 'Booking successful' });
   });
 });
 
