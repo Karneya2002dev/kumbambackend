@@ -326,6 +326,21 @@ app.get('/api/banquet_halls/:id', (req, res) => {
 });
 
 
+// GET /api/bookings/dates/:mahalName
+app.get('/api/bookings/dates/:mahalName', (req, res) => {
+  const { mahalName } = req.params;
+  const sql = 'SELECT dates FROM bookings WHERE mahal_name = ?';
+
+  db.query(sql, [mahalName], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    // Flatten and parse booked dates
+    const bookedDates = results.flatMap(row => JSON.parse(row.dates));
+    res.json(bookedDates);
+  });
+});
+
+
 
 
 
