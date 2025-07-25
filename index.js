@@ -264,44 +264,43 @@ app.get('/api/availability/:mahalId/:month/:year', (req, res) => {
 });
 
 
-// Inside your /bookings route
 app.post('/api/bookings', (req, res) => {
-  const { name, phone, date, time, user_id, mahal_id } = req.body;
+  const {
+    name, phone, event_type,
+    address, mahal_name, location,
+    price, dates
+  } = req.body;
 
   const sql = `
-    INSERT INTO bookings (name, phone, date, time, user_id, mahal_id)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO bookings
+    (name, phone, event_type, address, mahal_name, location, price, dates)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
-  db.query(sql, [name, phone, date, time, user_id, mahal_id], (err, result) => {
+
+  db.query(sql, [
+    name, phone, event_type, address,
+    mahal_name, location, price, dates
+  ], (err, result) => {
     if (err) {
-      console.error('Error creating booking:', err);
-      return res.status(500).json({ error: 'Database error' });
+      console.error("Booking Error:", err);
+      return res.status(500).json({ message: 'Booking failed', error: err });
     }
-
-    const bookingId = result.insertId;
-
-    // ✅ Get mahal name & price using mahal_id
-    const mahalQuery = `
-      SELECT name AS mahal_name, price FROM mahals WHERE id = ?
-    `;
-    db.query(mahalQuery, [mahal_id], (err, mahalResult) => {
-      if (err || mahalResult.length === 0) {
-        return res.status(500).json({ error: 'Could not retrieve mahal info' });
-      }
-
-      const { mahal_name, price } = mahalResult[0];
-
-      // ✅ Return full booking data
-      res.status(200).json({
-        id: bookingId,
-        name,
-        phone,
-        mahal_name,
-        price
-      });
-    });
+    res.status(200).json({ message: 'Booking successful' });
   });
 });
+
+
+app.get('/bookings/:id', (req, res) => {
+  const bookingId = req.params.id;
+  const sql = 'SELECT name, phone, mahal_name, price FROM bookings WHERE id = ?';
+
+  db.query(sql, [bookingId], (err, result) => {
+    if (err) return res.status(500).json({ error: 'DB error' });
+    if (result.length === 0) return res.status(404).json({ error: 'Booking not found' });
+    res.json(result[0]);
+  });
+});
+
 
 
 // ✅ Start Server
