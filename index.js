@@ -11,6 +11,8 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
+
+
 // ✅ Use MySQL Connection Pool
 const db = mysql.createPool({
   host: process.env.DB_HOST,
@@ -31,6 +33,10 @@ db.getConnection((err, connection) => {
     connection.release();
   }
 });
+
+const availabilityRoute = require('./routes/availablity');
+app.use('/api/availability', availabilityRoute);
+
 
 // ✅ Nodemailer Setup
 const transporter = nodemailer.createTransport({
@@ -241,6 +247,41 @@ app.get('/api/categories', (req, res) => {
     res.json(categories);
   });
 });
+
+// ✅ Availability with Mahal Name & Price
+app.get('/api/availability/:mahalId/:month/:year', (req, res) => {
+  const { mahalId, month, year } = req.params;
+  const sql = `
+    SELECT bh.name AS mahal_name, bh.price AS mahal_price, b.booking_date, b.status
+    FROM bookings b
+    JOIN banquet_halls bh ON b.mahal_id = bh.id
+    WHERE MONTH(b.booking_date) = ? AND YEAR(b.booking_date) = ? AND b.mahal_id = ?
+  `;
+  db.query(sql, [month, year, mahalId], (err, result) => {
+    if (err) return res.status(500).json({ error: err });
+    res.json(result);
+  });
+});
+
+
+app.post('/api/bookings', (req, res) => {
+  const { name, phone, event_type, address, mahal_name, location, price, dates } = req.body;
+
+  const query = `
+    INSERT INTO bookings (name, phone, event_type, address, mahal_name, location, price, dates)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+  const values = [name, phone, event_type, address, mahal_name, location, price, dates];
+
+  db.query(query, values, (err, result) => {
+    if (err) {
+      console.error('Booking Error:', err);
+      return res.status(500).json({ message: 'Server Error' });
+    }
+    res.status(200).json({ message: 'Booking saved successfully' });
+  });
+});
+
 
 // ✅ Start Server
 app.listen(5000, '0.0.0.0', () => {
