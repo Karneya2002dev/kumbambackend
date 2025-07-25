@@ -264,39 +264,42 @@ app.get('/api/availability/:mahalId/:month/:year', (req, res) => {
 });
 
 
+// Inside your /bookings route
 app.post('/api/bookings', (req, res) => {
-  const {
-    name, phone, event_type,
-    address, mahal_name, location,
-    price, dates
-  } = req.body;
+  const { name, phone, date, time, user_id, mahal_id } = req.body;
 
   const sql = `
-    INSERT INTO bookings
-    (name, phone, event_type, address, mahal_name, location, price, dates)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO bookings (name, phone, date, time, user_id, mahal_id)
+    VALUES (?, ?, ?, ?, ?, ?)
   `;
-
-  db.query(sql, [
-    name, phone, event_type, address,
-    mahal_name, location, price, dates
-  ], (err, result) => {
+  db.query(sql, [name, phone, date, time, user_id, mahal_id], (err, result) => {
     if (err) {
-      console.error("Booking Error:", err);
-      return res.status(500).json({ message: 'Booking failed', error: err });
+      console.error('Error creating booking:', err);
+      return res.status(500).json({ error: 'Database error' });
     }
-    res.status(200).json({ message: 'Booking successful' });
-  });
-});
 
+    const bookingId = result.insertId;
 
-app.get('/bookings/:id', (req, res) => {
-  const bookingId = req.params.id;
-  const sql = 'SELECT * FROM bookings WHERE id = ?';
-  db.query(sql, [bookingId], (err, results) => {
-    if (err) return res.status(500).json({ error: 'Database error' });
-    if (results.length === 0) return res.status(404).json({ error: 'Not found' });
-    res.json(results[0]);
+    // ✅ Get mahal name & price using mahal_id
+    const mahalQuery = `
+      SELECT name AS mahal_name, price FROM mahals WHERE id = ?
+    `;
+    db.query(mahalQuery, [mahal_id], (err, mahalResult) => {
+      if (err || mahalResult.length === 0) {
+        return res.status(500).json({ error: 'Could not retrieve mahal info' });
+      }
+
+      const { mahal_name, price } = mahalResult[0];
+
+      // ✅ Return full booking data
+      res.status(200).json({
+        id: bookingId,
+        name,
+        phone,
+        mahal_name,
+        price
+      });
+    });
   });
 });
 
