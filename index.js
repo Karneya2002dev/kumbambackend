@@ -313,6 +313,19 @@ app.get('/api/booking/:id', (req, res) => {
 });
 
 
+// GET /api/banquet_halls/:id
+app.get('/api/banquet_halls/:id', (req, res) => {
+  const { id } = req.params;
+  const sql = 'SELECT * FROM banquet_halls WHERE id = ?';
+
+  db.query(sql, [id], (err, result) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (result.length === 0) return res.status(404).json({ error: 'Mahal not found' });
+    res.json(result[0]);
+  });
+});
+
+
 
 
 
