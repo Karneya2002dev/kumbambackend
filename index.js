@@ -293,19 +293,25 @@ app.post('/api/bookings', (req, res) => {
 // GET /booking/:id
 app.get('/api/booking/:id', (req, res) => {
   const bookingId = req.params.id;
-  const sql = 'SELECT name, phone, mahal_name, price FROM bookings WHERE id = ?';
+  console.log(`🔍 Fetching booking for ID: ${bookingId}`);
 
+  const sql = 'SELECT name, phone, mahal_name, price FROM bookings WHERE id = ?';
   db.query(sql, [bookingId], (err, result) => {
     if (err) {
-      console.error('Database error:', err);
+      console.error('❌ DB error:', err);
       return res.status(500).json({ error: 'Database error' });
     }
+
     if (result.length === 0) {
+      console.warn('⚠️ Booking not found for ID:', bookingId);
       return res.status(404).json({ error: 'Booking not found' });
     }
+
+    console.log('✅ Booking found:', result[0]);
     res.json(result[0]);
   });
 });
+
 
 
 
